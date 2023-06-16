@@ -1,9 +1,13 @@
 import React from 'react';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, useGLTF, useTexture } from '@react-three/drei';
 import { folder, useControls } from 'leva';
+import Particles from './Particles';
 
 const Earth = () => {
-  const { position, color, visible } = useControls({
+  const { nodes } = useGLTF('./models/earth/scene.gltf');
+  const diffuseTexture = useTexture('./models/earth/textures/Material.002_diffuse.jpeg');
+  diffuseTexture.flipY = false;
+  const { position, visible, rotation } = useControls({
     earth: folder({
       position: {
         value: { x: 0, y: 0, z: 0 },
@@ -12,26 +16,36 @@ const Earth = () => {
         step: 0.01,
         joystick: 'invertY',
       },
-      color: 'rgb(255, 0, 0)',
       visible: true,
+      rotation: {
+        value: { x: -1.29, y: -0.2, z: -2.03 },
+        min: -5,
+        max: 5,
+        step: 0.01,
+        joystick: 'invertY',
+      },
     }),
   });
 
   return (
     <>
-      <OrbitControls makeDefault />
-
+      <OrbitControls makeDefault autoRotate autoRotateSpeed={1} />
       <directionalLight position={[1, 2, 3]} intensity={1.5} />
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={1} />
+
+      <Particles />
 
       <mesh
         position-x={position.x}
         position-y={position.y}
         position-z={position.z}
         visible={visible}
+        geometry={nodes.Sphere_Material002_0.geometry}
+        rotation-x={rotation.x}
+        rotation-y={rotation.y}
+        rotation-z={rotation.z}
       >
-        <sphereGeometry />
-        <meshStandardMaterial color={color} />
+        <meshStandardMaterial map={diffuseTexture} />
       </mesh>
     </>
   );
